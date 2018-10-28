@@ -12,6 +12,7 @@ if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
     echo "APP_BASE was not set. Aborting" | indent
     exit 1
 fi
+
 APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
 (
@@ -26,6 +27,9 @@ if [ "$?" -ne 0 ]; then
 fi
 
 echo "Copied ${APP_BASE} to root of app successfully" | indent
+
+echo "Dump env"
+env
 
 if [ ! -z "$HEROKU_TEST_RUN_ID" ]; then
   echo "Reinitializing CI"
