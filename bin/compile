@@ -28,10 +28,7 @@ fi
 
 echo "Copied ${APP_BASE} to root of app successfully" | indent
 
-echo "Dump env"
-env
-
-if [ ! -z "$HEROKU_TEST_RUN_ID" ]; then
+if type "ci" > /dev/null; then
   echo "Reinitializing CI"
   ci setup && eval $(ci env)
 fi
