@@ -47,5 +47,6 @@ echo "Copied ${APP_BASE} to root of app successfully" | indent
 if type "ci" > /dev/null; then
   echo "Reinitializing CI"
   export_env_dir "$ENV_DIR"
+  export HEROKU_TEST_RUN_MANIFEST="{}"
   ci setup && eval $(ci env)
 fi
