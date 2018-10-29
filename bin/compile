@@ -25,9 +25,6 @@ export_env_dir() {
   fi
 }
 
-echo ">>>> $FLAG"
-ls
-
 if [ -f "$FLAG" ]; then
     echo "Prevent recursive build" | indent
     exit 0
@@ -59,5 +56,5 @@ if type "ci" > /dev/null; then
   export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
   export HEROKU_TEST_CACHE_GET_URL
   touch "$FLAG"
-  ci setup && eval $(ci env)
+  cd "${BUILD_DIR}" && ci setup && eval $(ci env)
 fi
