@@ -28,6 +28,8 @@ fi
 
 echo "Copied ${APP_BASE} to root of app successfully" | indent
 
+ls "$ENV_DIR"
+
 if type "ci" > /dev/null; then
   echo "Reinitializing CI"
   export HEROKU_TEST_RUN_MANIFEST="{}"
