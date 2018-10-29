@@ -49,7 +49,7 @@ if [ -z "$IS_HEROKU_CI" ]; then
     if type "ci" > /dev/null; then
       echo "Reinitializing CI" | indent
       export_env_dir "$ENV_DIR"
-      export HEROKU_TEST_RUN_MANIFEST="$(cat app.json)"
+      export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
       export HEROKU_TEST_CACHE_GET_URL
       export IS_HEROKU_CI="1"
       ci setup && eval $(ci env)
