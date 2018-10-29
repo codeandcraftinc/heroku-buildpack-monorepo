@@ -24,30 +24,35 @@ export_env_dir() {
   fi
 }
 
-if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
-    echo "APP_BASE was not set. Aborting" | indent
-    exit 1
-fi
+if [ -z "$IS_HEROKU_CI" ]; then
 
-APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+    if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
+        echo "APP_BASE was not set. Aborting" | indent
+        exit 1
+    fi
 
-(
-    mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
-    rm -rf "${BUILD_DIR}"/* &&
-    mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
-)
+    APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
-if [ "$?" -ne 0 ]; then
-    echo "FAILED to copy directory into place" | indent
-    exit 1
-fi
+    (
+        mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
+        rm -rf "${BUILD_DIR}"/* &&
+        mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
+    )
 
-echo "Copied ${APP_BASE} to root of app successfully" | indent
+    if [ "$?" -ne 0 ]; then
+        echo "FAILED to copy directory into place" | indent
+        exit 1
+    fi
 
-if type "ci" > /dev/null; then
-  echo "Reinitializing CI" | indent
-  export_env_dir "$ENV_DIR"
-  export HEROKU_TEST_RUN_MANIFEST="{}"
-  export HEROKU_TEST_CACHE_GET_URL
-  ci setup && eval $(ci env)
+    echo "Copied ${APP_BASE} to root of app successfully" | indent
+
+    if type "ci" > /dev/null; then
+      echo "Reinitializing CI" | indent
+      export_env_dir "$ENV_DIR"
+      export HEROKU_TEST_RUN_MANIFEST="$(cat app.json)"
+      export HEROKU_TEST_CACHE_GET_URL
+      export IS_HEROKU_CI="1"
+      ci setup && eval $(ci env)
+    fi
+
 fi
