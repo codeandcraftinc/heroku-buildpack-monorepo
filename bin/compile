@@ -24,7 +24,7 @@ export_env_dir() {
   fi
 }
 
-if [ -z "$IS_HEROKU_CI" ]; then
+if [ ! -f "${BUILD_DIR}/ci" ]; then
 
     if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
         echo "APP_BASE was not set. Aborting" | indent
@@ -51,7 +51,7 @@ if [ -z "$IS_HEROKU_CI" ]; then
       export_env_dir "$ENV_DIR"
       export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
       export HEROKU_TEST_CACHE_GET_URL
-      export IS_HEROKU_CI="1"
+      touch "${BUILD_DIR}/ci"
       ci setup && eval $(ci env)
     fi
 
