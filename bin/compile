@@ -58,3 +58,5 @@ if type "ci" > /dev/null; then
   touch "$FLAG"
   cd "${BUILD_DIR}" && ci setup && eval $(ci env)
 fi
+
+export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
