@@ -7,6 +7,7 @@ BUILD_DIR="$1"
 CACHE_DIR="$2"
 ENV_DIR="$3"
 STAGE="$(mktemp -d)"
+FLAG="${BUILD_DIR}/.prevent-recursive-build"
 
 export_env_dir() {
   local env_dir=$1
@@ -24,35 +25,36 @@ export_env_dir() {
   fi
 }
 
-if [ ! -f "${BUILD_DIR}/ci" ]; then
+if [ -f "$FLAG" ]; then
+    echo "Prevent recursive build" | indent
+    exit 0
+fi
 
-    if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
-        echo "APP_BASE was not set. Aborting" | indent
-        exit 1
-    fi
+if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
+    echo "APP_BASE was not set. Aborting" | indent
+    exit 1
+fi
 
-    APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
-    (
-        mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
-        rm -rf "${BUILD_DIR}"/* &&
-        mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
-    )
+(
+    mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
+    rm -rf "${BUILD_DIR}"/* &&
+    mv "${STAGE}/$(basename "$APP_BASE")"/* "${BUILD_DIR}"
+)
 
-    if [ "$?" -ne 0 ]; then
-        echo "FAILED to copy directory into place" | indent
-        exit 1
-    fi
+if [ "$?" -ne 0 ]; then
+    echo "FAILED to copy directory into place" | indent
+    exit 1
+fi
 
-    echo "Copied ${APP_BASE} to root of app successfully" | indent
+echo "Copied ${APP_BASE} to root of app successfully" | indent
 
-    if type "ci" > /dev/null; then
-      echo "Reinitializing CI" | indent
-      export_env_dir "$ENV_DIR"
-      export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
-      export HEROKU_TEST_CACHE_GET_URL
-      touch "${BUILD_DIR}/ci"
-      ci setup && eval $(ci env)
-    fi
-
+if type "ci" > /dev/null; then
+  echo "Reinitializing CI" | indent
+  export_env_dir "$ENV_DIR"
+  export HEROKU_TEST_RUN_MANIFEST="$(cat $BUILD_DIR/app.json)"
+  export HEROKU_TEST_CACHE_GET_URL
+  touch "$FLAG"
+  ci setup && eval $(ci env)
 fi
