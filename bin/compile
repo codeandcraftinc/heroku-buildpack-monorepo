@@ -25,6 +25,9 @@ export_env_dir() {
   fi
 }
 
+echo ">>>> $FLAG"
+ls
+
 if [ -f "$FLAG" ]; then
     echo "Prevent recursive build" | indent
     exit 0
